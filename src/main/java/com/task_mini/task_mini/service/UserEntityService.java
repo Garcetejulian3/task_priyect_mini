@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.task_mini.task_mini.dto.auth.DTOLoginRequest;
@@ -22,7 +22,7 @@ import com.task_mini.task_mini.service.impl.UserEntityImpl;
 public class UserEntityService implements UserEntityImpl{
 
     @Autowired
-    BCryptPasswordEncoder encoder;
+    private PasswordEncoder encoder;
 
     @Autowired
     UserRepository userRepo;

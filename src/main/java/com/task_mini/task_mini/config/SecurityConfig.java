@@ -1,6 +1,5 @@
 package com.task_mini.task_mini.config;
 
-import org.springframework.security.config.Customizer;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,25 +24,32 @@ import com.task_mini.task_mini.service.UserDetailServiceImpl;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception{
-            return httpSecurity
-                .csrf(csrf -> csrf.disable())
-                .httpBasic(Customizer.withDefaults())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(http -> {
-                    // configuro los endpoints publicos
-                    //http.requestMatchers(HttpMethod.GET,"/auth/").permitAll();
-                    // configuro los endpoints privados
-                    http.requestMatchers(HttpMethod.GET,"/auth/get").hasAnyAuthority("READ");
-                    // configuro el resto de endpoints no especificados
-                    http.anyRequest().denyAll();
-                })
-                .build();
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity,
+                                                   AuthenticationProvider authProvider) throws Exception{
 
+        return httpSecurity
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+            )
+            .formLogin(form -> form.disable()) // ← IMPORTANTE
+            .authenticationProvider(authProvider) // ← IMPORTANTE
+            .authorizeHttpRequests(http -> {
+                // Endpoints públicos
+                http.requestMatchers(HttpMethod.POST,"/users/register").permitAll();
+                http.requestMatchers(HttpMethod.POST,"/users/login").permitAll();
+
+                // Endpoints privados
+                http.requestMatchers(HttpMethod.GET,"/auth/get").hasAnyAuthority("READ");
+
+                // Resto denegado
+                http.anyRequest().denyAll();
+            })
+            .build();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception{
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
@@ -59,6 +65,4 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
-
-
 }

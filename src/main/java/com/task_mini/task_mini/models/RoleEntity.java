@@ -34,7 +34,7 @@ public class RoleEntity {
     @Enumerated(EnumType.STRING)
     private RoleEnum roleEnum;
 
-    @ManyToMany(fetch = FetchType.EAGER,cascade = {CascadeType.PERSIST,CascadeType.MERGE})
+    @ManyToMany(fetch = FetchType.EAGER,cascade = {CascadeType.MERGE})
     @JoinTable(name = "roles_permisos",joinColumns = @JoinColumn(name = "role_id"),inverseJoinColumns = @JoinColumn(name = "permiso_id"))
     @Builder.Default
     private Set<PermisionEntity> permisosList = new HashSet<>();

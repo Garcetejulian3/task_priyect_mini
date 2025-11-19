@@ -26,26 +26,21 @@ public class TaskMiniApplication {
 	CommandLineRunner init(UserRepository userRepository,PermisionRepository permisionRepository,RoleRepository roleRepository){
         return args -> {
 
-            // CREACION DE PERMISOS
-            PermisionEntity createPermission = PermisionEntity.builder()
-            .name("CREATE")
-            .build();
+                // CREACION / RECUPERACION DE PERMISOS
+                PermisionEntity createPermission = permisionRepository.findByName("CREATE")
+                    .orElseGet(() -> permisionRepository.save(PermisionEntity.builder().name("CREATE").build()));
 
-            PermisionEntity readPermission = PermisionEntity.builder()
-            .name("READ")
-            .build();
+                PermisionEntity readPermission = permisionRepository.findByName("READ")
+                    .orElseGet(() -> permisionRepository.save(PermisionEntity.builder().name("READ").build()));
 
-            PermisionEntity updatePermission = PermisionEntity.builder()
-            .name("UPDATE")
-            .build();
+                PermisionEntity updatePermission = permisionRepository.findByName("UPDATE")
+                    .orElseGet(() -> permisionRepository.save(PermisionEntity.builder().name("UPDATE").build()));
 
-            PermisionEntity deletePermission = PermisionEntity.builder()
-            .name("DELETE")
-            .build();
+                PermisionEntity deletePermission = permisionRepository.findByName("DELETE")
+                    .orElseGet(() -> permisionRepository.save(PermisionEntity.builder().name("DELETE").build()));
 
-            PermisionEntity refactorPermission = PermisionEntity.builder()
-            .name("REFACTOR")
-            .build();
+                PermisionEntity refactorPermission = permisionRepository.findByName("REFACTOR")
+                    .orElseGet(() -> permisionRepository.save(PermisionEntity.builder().name("REFACTOR").build()));
 
 			// CREACION DE ROLES
 
