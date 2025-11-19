@@ -9,7 +9,10 @@ import org.springframework.stereotype.Service;
 
 import com.task_mini.task_mini.dto.auth.DTORegisterRequest;
 import com.task_mini.task_mini.dto.user.DTOUserResponse;
+import com.task_mini.task_mini.models.RoleEntity;
+import com.task_mini.task_mini.models.RoleEnum;
 import com.task_mini.task_mini.models.UserEntity;
+import com.task_mini.task_mini.repository.RoleRepository;
 import com.task_mini.task_mini.repository.UserRepository;
 import com.task_mini.task_mini.service.impl.UserEntityImpl;
 
@@ -19,12 +22,20 @@ public class UserEntityService implements UserEntityImpl{
     @Autowired
     UserRepository userRepo;
 
+    @Autowired
+    RoleRepository roleRepo;
+
     @Override
     public void createUserEntity(DTORegisterRequest dtoRegisterRequest) {
+
+        RoleEntity roleUser = roleRepo.findByRoleEnum(RoleEnum.USER)
+        .orElseThrow(()-> new RuntimeException("ROLE no funcionando"));
+
         UserEntity userEntity = new UserEntity();
         userEntity.setUsername(dtoRegisterRequest.getUsername());
         userEntity.setEmail(dtoRegisterRequest.getEmail());
         userEntity.setPassword(dtoRegisterRequest.getPassword());
+        userEntity.setRoles(Set.of(roleUser));
         userRepo.save(userEntity);
     }
 
@@ -66,6 +77,5 @@ public class UserEntityService implements UserEntityImpl{
         this.createUserEntity(dtoRegisterRequest);
     }
 
-   
 
 }
