@@ -10,6 +10,6 @@ import com.task_mini.task_mini.models.UserEntity;
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity,Long> {
     Optional<UserEntity> findUserEntityByUsername(String username);
-    boolean exiexistsByUsername(String username);
+    boolean existsByUsername(String username);
     Optional <UserEntity> findByEmail(String email);
 }

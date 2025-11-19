@@ -3,6 +3,7 @@ package com.task_mini.task_mini.models;
 import java.util.HashSet;
 import java.util.Set;
 
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -37,4 +38,6 @@ public class RoleEntity {
     @JoinTable(name = "roles_permisos",joinColumns = @JoinColumn(name = "role_id"),inverseJoinColumns = @JoinColumn(name = "permiso_id"))
     @Builder.Default
     private Set<PermisionEntity> permisosList = new HashSet<>();
+
+    
 }
