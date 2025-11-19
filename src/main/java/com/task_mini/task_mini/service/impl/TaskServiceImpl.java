@@ -17,5 +17,5 @@ public interface TaskServiceImpl {
     // metodo para eliminar 
     public void eliminarTask(Long id);
     // metodo para editar 
-    public void editar(DTOTaskUpdate dtoTaskUpdate);
+    public void editar(Long id,DTOTaskUpdate dtoTaskUpdate);
 }

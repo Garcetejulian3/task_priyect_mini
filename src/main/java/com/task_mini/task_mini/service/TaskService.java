@@ -21,23 +21,29 @@ import com.task_mini.task_mini.service.impl.TaskServiceImpl;
 @Service
 public class TaskService implements TaskServiceImpl {
 
+    private String getLoggedUsername() {
+        return SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+    }
+
     @Autowired
     TaskRepository taskRepo;
 
     @Autowired
     UserRepository userRepo;
+
     @Override
     public void createTaskEntity(DTOTaskCreate dtoTaskCreate) {
-        // obtener el usuario logeado desde la sesion 
-        String username = SecurityContextHolder.getContext()
-                                               .getAuthentication()
-                                               .getName();
+        // obtener el usuario logeado desde la sesion
+        String username = getLoggedUsername();
 
-        // busco el usuario en la base de datos 
+        // busco el usuario en la base de datos
         UserEntity userEntity = userRepo.findUserEntityByUsername(username)
-        .orElseThrow(()-> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // creo la tarea por fin 
+        // creo la tarea por fin
         Task task = new Task();
         task.setTitle(dtoTaskCreate.getTitle());
         task.setDescription(dtoTaskCreate.getDescription());
@@ -47,14 +53,18 @@ public class TaskService implements TaskServiceImpl {
         task.setUserDueno(userEntity);
 
         taskRepo.save(task);
-        
+
     }
 
     @Override
     public Set<DTOTaskResponse> listaDeTask() {
-        Set<DTOTaskResponse>listaDeTask = new HashSet<>();
-        List<Task>taskListBD = taskRepo.findAll();
-        for(Task task:taskListBD){
+
+        // usuario logueado
+        String username = getLoggedUsername();
+
+        Set<DTOTaskResponse> listaDeTask = new HashSet<>();
+        List<Task> taskListBD = taskRepo.findAllByUserDuenoUsername(username);
+        for (Task task : taskListBD) {
             DTOTaskResponse dtoTaskResponse = new DTOTaskResponse();
             dtoTaskResponse.setId(task.getId());
             dtoTaskResponse.setTitle(task.getTitle());
@@ -70,7 +80,13 @@ public class TaskService implements TaskServiceImpl {
 
     @Override
     public DTOTaskResponse traerTaskPorId(Long id) {
-        Task task = taskRepo.findById(id).orElseThrow(() -> new RuntimeException("Tarea no encontrada"));
+
+        // usuario logueado
+        String username = getLoggedUsername();
+
+        Task task = taskRepo.findByIdAndUserDuenoUsername(id, username)
+                .orElseThrow(() -> new RuntimeException("No tienes permiso para ver esta tarea"));
+
         DTOTaskResponse dtoTaskResponse = new DTOTaskResponse();
         dtoTaskResponse.setId(task.getId());
         dtoTaskResponse.setTitle(task.getTitle());
@@ -84,29 +100,37 @@ public class TaskService implements TaskServiceImpl {
 
     @Override
     public void eliminarTask(Long id) {
-        taskRepo.deleteById(id);
+        String username = getLoggedUsername();
+        Task task = taskRepo.findByIdAndUserDuenoUsername(id, username)
+                .orElseThrow(() -> new RuntimeException("No tienes permiso para eliminar esta tarea"));
+        taskRepo.delete(task);
     }
 
     @Override
-    public void editar(DTOTaskUpdate dtoTaskUpdate) {
-        // obtener el usuario logeado desde la sesion 
-        String username = SecurityContextHolder.getContext()
-                                               .getAuthentication()
-                                               .getName();
+    public void editar(Long id,DTOTaskUpdate dtoTaskUpdate) {
+        // usuario logueado
+        String username = getLoggedUsername();
 
-        // busco el usuario en la base de datos 
-        UserEntity userEntity = userRepo.findUserEntityByUsername(username)
-        .orElseThrow(()-> new RuntimeException("Usuario no encontrado"));
+        // buscar la tarea del usuario
+        Task task = taskRepo.findByIdAndUserDuenoUsername(id, username)
+                .orElseThrow(() -> new RuntimeException("No tienes permiso para editar esta tarea"));
 
-        // creo la tarea por fin 
-        Task task = new Task();
-        task.setTitle(dtoTaskUpdate.getTitle());
-        task.setDescription(dtoTaskUpdate.getDescription());
-        task.setAlarmAt(dtoTaskUpdate.getAlarmAt());
+        
+        if (dtoTaskUpdate.getTitle() != null) {
+            task.setTitle(dtoTaskUpdate.getTitle());
+        }
+
+        if (dtoTaskUpdate.getDescription() != null) {
+            task.setDescription(dtoTaskUpdate.getDescription());
+        }
+
+        if (dtoTaskUpdate.getAlarmAt() != null) {
+            task.setAlarmAt(dtoTaskUpdate.getAlarmAt());
+        }
+
         task.setCompleted(dtoTaskUpdate.isCompleted());
-        task.setCreatedAt(task.getCreatedAt());
-        task.setUserDueno(userEntity);
 
+        // guardar cambios
         taskRepo.save(task);
     }
 }
