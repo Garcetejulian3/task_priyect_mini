@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.task_mini.task_mini.dto.auth.DTOLoginRequest;
 import com.task_mini.task_mini.dto.auth.DTORegisterRequest;
 import com.task_mini.task_mini.dto.user.DTOUserResponse;
 import com.task_mini.task_mini.models.RoleEntity;
@@ -18,6 +20,9 @@ import com.task_mini.task_mini.service.impl.UserEntityImpl;
 
 @Service
 public class UserEntityService implements UserEntityImpl{
+
+    @Autowired
+    BCryptPasswordEncoder encoder;
 
     @Autowired
     UserRepository userRepo;
@@ -75,6 +80,20 @@ public class UserEntityService implements UserEntityImpl{
     @Override
     public void editar(DTORegisterRequest dtoRegisterRequest) {
         this.createUserEntity(dtoRegisterRequest);
+    }
+
+    @Override
+    public UserEntity login(DTOLoginRequest request) {
+        String username = request.getUsername();
+        String password = request.getPassword();
+        UserEntity user = userRepo.findUserEntityByUsername(username)
+        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        
+        if (!encoder.matches(password, user.getPassword())) {
+            throw new RuntimeException("Contraseña incorrecta");
+        }
+        return user;
     }
 
 
