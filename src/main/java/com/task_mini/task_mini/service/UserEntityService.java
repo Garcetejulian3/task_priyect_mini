@@ -39,7 +39,7 @@ public class UserEntityService implements UserEntityImpl{
         UserEntity userEntity = new UserEntity();
         userEntity.setUsername(dtoRegisterRequest.getUsername());
         userEntity.setEmail(dtoRegisterRequest.getEmail());
-        userEntity.setPassword(dtoRegisterRequest.getPassword());
+        userEntity.setPassword(encoder.encode(dtoRegisterRequest.getPassword()));
         userEntity.setRoles(Set.of(roleUser));
         userRepo.save(userEntity);
     }
@@ -78,8 +78,18 @@ public class UserEntityService implements UserEntityImpl{
     }
 
     @Override
-    public void editar(DTORegisterRequest dtoRegisterRequest) {
-        this.createUserEntity(dtoRegisterRequest);
+    public void editar(Long id,DTORegisterRequest dtoRegisterRequest) {
+        UserEntity user = userRepo.findById(id)
+        .orElseThrow(()-> new RuntimeException("No se encuentra al usuario"));
+
+        user.setUsername(dtoRegisterRequest.getUsername());
+        user.setEmail(dtoRegisterRequest.getEmail());
+        
+        if (dtoRegisterRequest.getPassword() != null && !dtoRegisterRequest.getPassword().isBlank()) {
+            user.setPassword(encoder.encode(dtoRegisterRequest.getPassword()));
+        }
+
+        userRepo.save(user);
     }
 
     @Override

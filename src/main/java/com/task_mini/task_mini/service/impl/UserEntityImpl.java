@@ -19,7 +19,7 @@ public interface UserEntityImpl {
     // metodo para eliminar 
     public void eliminarUsuario(Long id);
     // metodo para editar 
-    public void editar(DTORegisterRequest dtoRegisterRequest);
+    public void editar(Long id,DTORegisterRequest dtoRegisterRequest);
     // METODO PARA EL LOGIN
     public UserEntity login(DTOLoginRequest request );
 
